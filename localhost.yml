@@ -1,0 +1,167 @@
+- hosts: localhost
+  become: yes
+  vars:
+    cache_valid_time: 3600
+    dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
+    gopath: /home/yoshifumi/.go # .bashrcなどの記述と合わせること
+  tasks:
+    - name: set shell
+      user:
+        name: yoshifumi
+        shell: /usr/bin/fish
+
+    - name: replace sources.list
+      replace:
+        path: /etc/apt/sources.list
+        regexp: 'http://archive.ubuntu.com/ubuntu'
+        replace: 'http://ftp.jaist.ac.jp/pub/Linux/ubuntu/'
+        backup: yes
+
+    - name: add apt-key
+      apt_key:
+        url: "{{ item.url }}"
+      with_items:
+        - { url: 'https://dl-ssl.google.com/linux/linux_signing_key.pub' }
+        - { url: 'https://packages.microsoft.com/keys/microsoft.asc' }
+
+    - name: add apt-repository
+      apt_repository:
+        repo: "{{ item }}"
+      with_items:
+        - deb http://dl.google.com/linux/chrome/deb/ stable main
+        - deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+        - 'ppa:fish-shell/release-2'
+
+    # aptモジュールのupdate_cacheを使うとエラーになるので回避
+    - name: apt update
+      shell: apt update
+      register: apt_update_result
+      changed_when: False
+      failed_when: apt_update_result.rc not in [0] # 警告もOKにするなら100とか追加
+
+    - name: apt install
+      apt:
+        name: "{{ item.name }}" 
+        state: "{{ item.state }}" 
+        # cache_valid_time: "{{ cache_valid_time }}" # 2.4以降の場合cache_valid_timeを指定すると自動でupdate_cache=yes
+      with_items:
+        - { name: fonts-ricty-diminished, state: latest }
+        - { name: ibus-skk, state: latest }
+        - { name: skkdic, state: latest }
+        - { name: fish, state: latest }
+        - { name: direnv, state: latest }
+        - { name: curl, state: latest }
+        - { name: git, state: latest }
+        - { name: vim, state: latest }
+        - { name: tmux, state: latest }
+        - { name: golang, state: latest }
+        - { name: google-chrome-stable, state: latest }
+        - { name: code, state: latest }
+
+    - name: clone dotfiles
+      git:
+        repo: git@github.com:ikdysfm/dotfiles.git # pushには鍵を作るかssh-agentを使う
+        dest: ~{{ dotfiles_path }}
+      become: no
+
+    - name: create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - '~/.config/fish/functions'
+        - '/tmp/MyricaM'
+      become: no
+
+    - name: create dotfiles symlinks
+      file:
+        src: ~{{ dotfiles_path }}/{{ item.src }}
+        dest: "{{ item.dest }}"
+        state: link
+        force: yes
+      with_items:
+        - { src: git/.gitconfig, dest: ~/.gitconfig }
+        - { src: git/.gitignore_global, dest: ~/.gitignore_global }
+        - { src: fish/config.fish, dest: ~/.config/fish/config.fish }
+        - { src: fish/fishfile, dest: ~/.config/fish/fishfile }
+        - { src: fish/functions/fisher.fish, dest: ~/.config/fish/functions/fisher.fish }
+        - { src: fish/functions/provision.fish, dest: ~/.config/fish/functions/provision.fish }
+        - { src: fish/functions/nvm.fish, dest: ~/.config/fish/functions/nvm.fish }
+        - { src: fish/functions/tmux_smart_attach.fish, dest: ~/.config/fish/functions/tmux_smart_attach.fish }
+        - { src: tmux/.tmux.conf, dest: ~/.tmux.conf }
+      become: no
+
+    - name: download latest Myrica M
+      unarchive:
+        src: https://github.com/tomokuni/Myrica/raw/master/product/MyricaM.zip
+        dest: /tmp/MyricaM/
+        remote_src: yes
+      failed_when: False # ファイル名のせい？で一部ファイル展開時にエラーになるので無視する
+      become: no
+
+    - name: copy to /usr/local/share/fonts/MyricaM.TTC
+      copy:
+        src: /tmp/MyricaM/MyricaM.TTC
+        dest: /usr/local/share/fonts/
+
+    - name: check golang module
+      # shell: /bin/bash -lc "go list {{ item }}" # .bashrcから読みたかったが動かない
+      command: go list {{ item }}
+      register: go_module_check
+      failed_when: go_module_check.rc not in [0, 1]
+      changed_when: go_module_check.rc not in [0, 1]
+      with_items:
+        - github.com/motemen/ghq
+      become: no
+      environment:
+        GOPATH: "{{ gopath }}"
+
+    - name: install golang modules
+      # shell: /bin/bash -lc "go get {{ item.item }}"
+      command: go get {{ item.item }}
+      when: item.rc == 1 # チェック結果で存在していなかった場合のみ
+      with_items: "{{ go_module_check.results }}" # 配列で格納される
+      become: no
+      environment:
+        GOPATH: "{{ gopath }}"
+
+    - name: get latest peco version
+      shell: curl -sI https://github.com/peco/peco/releases/latest | awk -F'/' '/^Location:/{print $NF}'
+      register: peco_latest_version
+      changed_when: False
+      failed_when: peco_latest_version.rc not in [0]
+      become: no
+      args:
+        warn: false
+
+    - name: download latest peco
+      unarchive:
+        src: https://github.com/peco/peco/releases/download/{{ peco_latest_version.stdout }}/peco_linux_amd64.tar.gz
+        dest: /tmp/
+        remote_src: yes
+      become: no
+
+    - name: copy to /usr/local/bin/peco
+      copy:
+        src: /tmp/peco_linux_amd64/peco
+        dest: /usr/local/bin/
+        mode: 0755
+
+    - name: download latest nvm
+      shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+      register: download_nvm_result
+      changed_when: False
+      failed_when: download_nvm_result.rc not in [0]
+      become: no
+      args:
+        warn: false
+
+    - name: install fish plugins
+      shell: fisher
+      register: install_fish_plugins_result
+      changed_when: False
+      failed_when: install_fish_plugins_result.rc not in [0]
+      become: no
+      args:
+        executable: /usr/bin/fish
+
