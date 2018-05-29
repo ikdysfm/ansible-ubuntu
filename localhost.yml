@@ -57,6 +57,15 @@
         - { name: golang, state: latest }
         - { name: google-chrome-stable, state: latest }
         - { name: code, state: latest }
+        - { name: ubuntu-restricted-extras, state: latest }
+        - { name: vlc, state: latest }
+
+    - name: replace skk.xml # ibus-skkは独自のキーボード配列設定を持っていて、デフォルトが日本語
+      replace:
+        path: /usr/share/ibus/component/skk.xml
+        regexp: '<layout>jp</layout>'
+        replace: '<layout>us</layout>'
+        backup: yes
 
     - name: clone dotfiles
       git:
@@ -165,3 +174,16 @@
       args:
         executable: /usr/bin/fish
 
+    - name: gsettings
+      command: gsettings set {{ item }}
+      register: gsettings_result
+      changed_when: False
+      failed_when: gsettings_result.rc not in [0]
+      become: no
+      with_items:
+        - org.gnome.desktop.screensaver lock-enabled false
+        - org.gnome.desktop.session idle-delay 900
+        - org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'skk')]"
+        - org.gnome.desktop.interface clock-show-date true
+        - org.gnome.shell.extensions.dash-to-dock dock-fixed false
+        - org.gnome.settings-daemon.plugins.power power-button-action suspend
