@@ -1,16 +1,17 @@
 - hosts: localhost
-  become: yes
   vars:
     cache_valid_time: 3600
     dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
     gopath: /home/yoshifumi/.go # .bashrcなどの記述と合わせること
   tasks:
     - name: set shell
+      become: yes
       user:
         name: yoshifumi
         shell: /usr/bin/fish
 
     - name: replace sources.list
+      become: yes
       replace:
         path: /etc/apt/sources.list
         regexp: 'http://archive.ubuntu.com/ubuntu'
@@ -18,6 +19,7 @@
         backup: yes
 
     - name: add apt-key
+      become: yes
       apt_key:
         url: "{{ item.url }}"
       with_items:
@@ -25,6 +27,7 @@
         - { url: 'https://packages.microsoft.com/keys/microsoft.asc' }
 
     - name: add apt-repository
+      become: yes
       apt_repository:
         repo: "{{ item }}"
       with_items:
@@ -34,12 +37,14 @@
 
     # aptモジュールのupdate_cacheを使うとエラーになるので回避
     - name: apt update
+      become: yes
       shell: apt update
       register: apt_update_result
       changed_when: False
       failed_when: apt_update_result.rc not in [0] # 警告もOKにするなら100とか追加
 
     - name: apt install
+      become: yes
       apt:
         name: "{{ item.name }}" 
         state: "{{ item.state }}" 
@@ -61,6 +66,7 @@
         - { name: vlc, state: latest }
 
     - name: replace skk.xml # ibus-skkは独自のキーボード配列設定を持っていて、デフォルトが日本語
+      become: yes
       replace:
         path: /usr/share/ibus/component/skk.xml
         regexp: '<layout>jp</layout>'
@@ -71,7 +77,6 @@
       git:
         repo: git@github.com:ikdysfm/dotfiles.git # pushには鍵を作るかssh-agentを使う
         dest: ~{{ dotfiles_path }}
-      become: no
 
     - name: create directories
       file:
@@ -80,7 +85,6 @@
       with_items:
         - '~/.config/fish/functions'
         - '/tmp/MyricaM'
-      become: no
 
     - name: create dotfiles symlinks
       file:
@@ -98,7 +102,6 @@
         - { src: fish/functions/nvm.fish, dest: ~/.config/fish/functions/nvm.fish }
         - { src: fish/functions/tmux_smart_attach.fish, dest: ~/.config/fish/functions/tmux_smart_attach.fish }
         - { src: tmux/.tmux.conf, dest: ~/.tmux.conf }
-      become: no
 
     - name: download latest Myrica M
       unarchive:
@@ -106,9 +109,9 @@
         dest: /tmp/MyricaM/
         remote_src: yes
       failed_when: False # ファイル名のせい？で一部ファイル展開時にエラーになるので無視する
-      become: no
 
     - name: copy to /usr/local/share/fonts/MyricaM.TTC
+      become: yes
       copy:
         src: /tmp/MyricaM/MyricaM.TTC
         dest: /usr/local/share/fonts/
@@ -121,7 +124,6 @@
       changed_when: go_module_check.rc not in [0, 1]
       with_items:
         - github.com/motemen/ghq
-      become: no
       environment:
         GOPATH: "{{ gopath }}"
 
@@ -130,7 +132,6 @@
       command: go get {{ item.item }}
       when: item.rc == 1 # チェック結果で存在していなかった場合のみ
       with_items: "{{ go_module_check.results }}" # 配列で格納される
-      become: no
       environment:
         GOPATH: "{{ gopath }}"
 
@@ -139,7 +140,6 @@
       register: peco_latest_version
       changed_when: False
       failed_when: peco_latest_version.rc not in [0]
-      become: no
       args:
         warn: false
 
@@ -148,9 +148,9 @@
         src: https://github.com/peco/peco/releases/download/{{ peco_latest_version.stdout }}/peco_linux_amd64.tar.gz
         dest: /tmp/
         remote_src: yes
-      become: no
 
     - name: copy to /usr/local/bin/peco
+      become: yes
       copy:
         src: /tmp/peco_linux_amd64/peco
         dest: /usr/local/bin/
@@ -161,7 +161,6 @@
       register: download_nvm_result
       changed_when: False
       failed_when: download_nvm_result.rc not in [0]
-      become: no
       args:
         warn: false
 
@@ -170,7 +169,6 @@
       register: install_fish_plugins_result
       changed_when: False
       failed_when: install_fish_plugins_result.rc not in [0]
-      become: no
       args:
         executable: /usr/bin/fish
 
@@ -179,11 +177,11 @@
       register: gsettings_result
       changed_when: False
       failed_when: gsettings_result.rc not in [0]
-      become: no
       with_items:
         - org.gnome.desktop.screensaver lock-enabled false
         - org.gnome.desktop.session idle-delay 900
         - org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'skk')]"
+        - org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
         - org.gnome.desktop.interface clock-show-date true
         - org.gnome.shell.extensions.dash-to-dock dock-fixed false
         - org.gnome.settings-daemon.plugins.power power-button-action suspend
