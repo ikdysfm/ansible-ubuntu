@@ -1,8 +1,8 @@
 - hosts: localhost
   vars:
-    cache_valid_time: 3600
     dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
-    gopath: /home/yoshifumi/.go # .bashrcなどの記述と合わせること
+  roles:
+    - app
   tasks:
     - name: set shell
       become: yes
@@ -17,68 +17,6 @@
         regexp: 'http://archive.ubuntu.com/ubuntu'
         replace: 'http://ftp.jaist.ac.jp/pub/Linux/ubuntu/'
         backup: yes
-
-    - name: add apt-key
-      become: yes
-      apt_key:
-        url: "{{ item.url }}"
-      with_items:
-        - { url: 'https://dl-ssl.google.com/linux/linux_signing_key.pub' }
-        - { url: 'https://packages.microsoft.com/keys/microsoft.asc' }
-
-    - name: add apt-repository
-      become: yes
-      apt_repository:
-        repo: "{{ item }}"
-      with_items:
-        - deb http://dl.google.com/linux/chrome/deb/ stable main
-        - deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
-        - 'ppa:fish-shell/release-2'
-
-    # aptモジュールのupdate_cacheを使うとエラーになるので回避
-    - name: apt update
-      become: yes
-      shell: apt update
-      register: apt_update_result
-      changed_when: False
-      failed_when: apt_update_result.rc not in [0] # 警告もOKにするなら100とか追加
-
-    - name: apt install
-      become: yes
-      apt:
-        name: "{{ item.name }}" 
-        state: "{{ item.state }}" 
-        # cache_valid_time: "{{ cache_valid_time }}" # 2.4以降の場合cache_valid_timeを指定すると自動でupdate_cache=yes
-      with_items:
-        - { name: fonts-ricty-diminished, state: latest }
-        - { name: ibus-skk, state: latest }
-        - { name: skkdic, state: latest }
-        - { name: fish, state: latest }
-        - { name: direnv, state: latest }
-        - { name: curl, state: latest }
-        - { name: git, state: latest }
-        - { name: vim, state: latest }
-        - { name: tmux, state: latest }
-        - { name: python3-pip, state: present }
-        - { name: python3-dev, state: present }
-        - { name: golang, state: present }
-        - { name: google-chrome-stable, state: latest }
-        - { name: code, state: latest }
-        - { name: ubuntu-restricted-extras, state: latest }
-        - { name: vlc, state: latest }
-        - { name: gnome-tweaks, state: latest }
-        - { name: materia-gtk-theme, state: latest }
-        - { name: papirus-icon-theme, state: latest }
-        - { name: fonts-roboto, state: latest }
-        - { name: fonts-mplus, state: latest }
-
-    - name: pip install # handlersに定義してapt installからnotifyしようかと思ったが、changeが走らないとnotifyされないので保留
-      pip:
-        name: "{{ item.name }}" 
-        state: "{{ item.state }}" 
-        executable: pip3
-      with_items:
-        - { name: pipenv, state: present }
 
     - name: replace skk.xml # ibus-skkは独自のキーボード配列設定を持っていて、デフォルトが日本語
       become: yes
@@ -114,6 +52,7 @@
         - { src: fish/fishfile, dest: ~/.config/fish/fishfile }
         - { src: fish/functions/fisher.fish, dest: ~/.config/fish/functions/fisher.fish }
         - { src: fish/functions/provision.fish, dest: ~/.config/fish/functions/provision.fish }
+        - { src: fish/functions/provision_app.fish, dest: ~/.config/fish/functions/provision_app.fish }
         - { src: fish/functions/nvm.fish, dest: ~/.config/fish/functions/nvm.fish }
         - { src: fish/functions/tmux_smart_attach.fish, dest: ~/.config/fish/functions/tmux_smart_attach.fish }
         - { src: tmux/.tmux.conf, dest: ~/.tmux.conf }
@@ -131,62 +70,6 @@
         src: /tmp/MyricaM/MyricaM.TTC
         dest: /usr/local/share/fonts/
 
-    - name: check golang module
-      # shell: /bin/bash -lc "go list {{ item }}" # .bashrcから読みたかったが動かない
-      command: go list {{ item }}
-      register: go_module_check
-      failed_when: go_module_check.rc not in [0, 1]
-      changed_when: go_module_check.rc not in [0, 1]
-      with_items:
-        - github.com/motemen/ghq
-      environment:
-        GOPATH: "{{ gopath }}"
-
-    - name: install golang modules
-      # shell: /bin/bash -lc "go get {{ item.item }}"
-      command: go get {{ item.item }}
-      when: item.rc == 1 # チェック結果で存在していなかった場合のみ
-      with_items: "{{ go_module_check.results }}" # 配列で格納される
-      environment:
-        GOPATH: "{{ gopath }}"
-
-    - name: get latest peco version
-      shell: curl -sI https://github.com/peco/peco/releases/latest | awk -F'/' '/^Location:/{print $NF}'
-      register: peco_latest_version
-      changed_when: False
-      failed_when: peco_latest_version.rc not in [0]
-      args:
-        warn: false
-
-    - name: download latest peco
-      unarchive:
-        src: https://github.com/peco/peco/releases/download/{{ peco_latest_version.stdout }}/peco_linux_amd64.tar.gz
-        dest: /tmp/
-        remote_src: yes
-
-    - name: copy to /usr/local/bin/peco
-      become: yes
-      copy:
-        src: /tmp/peco_linux_amd64/peco
-        dest: /usr/local/bin/
-        mode: 0755
-
-    - name: download latest nvm
-      shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-      register: download_nvm_result
-      changed_when: False
-      failed_when: download_nvm_result.rc not in [0]
-      args:
-        warn: false
-
-    - name: install fish plugins
-      shell: fisher
-      register: install_fish_plugins_result
-      changed_when: False
-      failed_when: install_fish_plugins_result.rc not in [0]
-      args:
-        executable: /usr/bin/fish
-
     - name: gsettings
       command: gsettings set {{ item }}
       register: gsettings_result
@@ -201,7 +84,7 @@
         - org.gnome.desktop.interface gtk-enable-primary-paste false
         - org.gnome.desktop.interface gtk-theme "Materia-dark-compact"
         - org.gnome.desktop.interface icon-theme "Papirus-Dark"
-        - org.gnome.desktop.interface monospace-font-name "M+ 1m 13"
+        - org.gnome.desktop.interface monospace-font-name "M+ 1m 12"
         - org.gnome.desktop.interface show-battery-percentage true
         - org.gnome.desktop.screensaver lock-enabled false
         - org.gnome.desktop.session idle-delay 900
