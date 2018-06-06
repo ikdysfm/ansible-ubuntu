@@ -1,0 +1,38 @@
+- name: apt install gnome
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}"
+  with_items:
+    - { name: gnome-tweaks, state: latest }
+    - { name: materia-gtk-theme, state: latest }
+    - { name: papirus-icon-theme, state: latest }
+    - { name: fonts-ricty-diminished, state: latest }
+    - { name: fonts-roboto, state: latest }
+    - { name: fonts-mplus, state: latest }
+
+- name: gsettings
+  command: gsettings set {{ item }}
+  register: gsettings_result
+  changed_when: False
+  failed_when: gsettings_result.rc not in [0]
+  with_items:
+    - org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'skk')]"
+    - org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
+    - org.gnome.desktop.interface clock-show-date true
+    - org.gnome.desktop.interface document-font-name "Roboto 11"
+    - org.gnome.desktop.interface font-name "Roboto 12"
+    - org.gnome.desktop.interface gtk-enable-primary-paste false
+    - org.gnome.desktop.interface gtk-theme "Materia-dark-compact"
+    - org.gnome.desktop.interface icon-theme "Papirus-Dark"
+    - org.gnome.desktop.interface monospace-font-name "M+ 1m 12"
+    - org.gnome.desktop.interface show-battery-percentage true
+    - org.gnome.desktop.screensaver lock-enabled false
+    - org.gnome.desktop.session idle-delay 900
+    - org.gnome.desktop.wm.preferences button-layout ":appmenu,minimize,maximize,close"
+    - org.gnome.desktop.wm.preferences mouse-button-modifier "<Alt>"
+    - org.gnome.desktop.wm.preferences resize-with-right-button true
+    - org.gnome.desktop.wm.preferences titlebar-font "Roboto 12"
+    - org.gnome.settings-daemon.plugins.power power-button-action suspend
+    - org.gnome.shell.extensions.dash-to-dock dock-fixed false

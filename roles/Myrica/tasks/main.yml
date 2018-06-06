@@ -1,0 +1,19 @@
+- name: create Myrica directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - '/tmp/MyricaM'
+
+- name: download latest Myrica M
+  unarchive:
+    src: https://github.com/tomokuni/Myrica/raw/master/product/MyricaM.zip
+    dest: /tmp/MyricaM/
+    remote_src: yes
+  failed_when: False # ファイル名のせい？で一部ファイル展開時にエラーになるので無視する
+
+- name: copy to /usr/local/share/fonts/MyricaM.TTC
+  become: yes
+  copy:
+    src: /tmp/MyricaM/MyricaM.TTC
+    dest: /usr/local/share/fonts/

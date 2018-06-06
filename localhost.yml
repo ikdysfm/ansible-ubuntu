@@ -1,96 +1,20 @@
 - hosts: localhost
-  vars:
-    dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
+  vars_prompt:
+    - name: "mode"
+      prompt: "Choose app-only or all."
+      default: app-only
+      private: no
+  # Ansibleの変数はplaybookやrole間で一つの名前空間を共有しているような挙動をするため
+  # 作法としてはhostやroleごとに固有のprefixをつけて一意にすべきだが
+  # localhostについてはcache_valid_timeなどを個別に定義するのがあまりに冗長だったため
+  # あえてhost_varsの変数定義を各roleが直接参照するような形にしている
   roles:
-    - app
-  tasks:
-    - name: set shell
-      become: yes
-      user:
-        name: yoshifumi
-        shell: /usr/bin/fish
-
-    - name: replace sources.list
-      become: yes
-      replace:
-        path: /etc/apt/sources.list
-        regexp: 'http://archive.ubuntu.com/ubuntu'
-        replace: 'http://ftp.jaist.ac.jp/pub/Linux/ubuntu/'
-        backup: yes
-
-    - name: replace skk.xml # ibus-skkは独自のキーボード配列設定を持っていて、デフォルトが日本語
-      become: yes
-      replace:
-        path: /usr/share/ibus/component/skk.xml
-        regexp: '<layout>jp</layout>'
-        replace: '<layout>us</layout>'
-        backup: yes
-
-    - name: clone dotfiles
-      git:
-        repo: git@github.com:ikdysfm/dotfiles.git # pushには鍵を作るかssh-agentを使う
-        dest: ~{{ dotfiles_path }}
-
-    - name: create directories
-      file:
-        path: "{{ item }}"
-        state: directory
-      with_items:
-        - '~/.config/fish/functions'
-        - '/tmp/MyricaM'
-
-    - name: create dotfiles symlinks
-      file:
-        src: ~{{ dotfiles_path }}/{{ item.src }}
-        dest: "{{ item.dest }}"
-        state: link
-        force: yes
-      with_items:
-        - { src: git/.gitconfig, dest: ~/.gitconfig }
-        - { src: git/.gitignore_global, dest: ~/.gitignore_global }
-        - { src: fish/config.fish, dest: ~/.config/fish/config.fish }
-        - { src: fish/fishfile, dest: ~/.config/fish/fishfile }
-        - { src: fish/functions/fisher.fish, dest: ~/.config/fish/functions/fisher.fish }
-        - { src: fish/functions/provision.fish, dest: ~/.config/fish/functions/provision.fish }
-        - { src: fish/functions/provision_app.fish, dest: ~/.config/fish/functions/provision_app.fish }
-        - { src: fish/functions/nvm.fish, dest: ~/.config/fish/functions/nvm.fish }
-        - { src: fish/functions/tmux_smart_attach.fish, dest: ~/.config/fish/functions/tmux_smart_attach.fish }
-        - { src: tmux/.tmux.conf, dest: ~/.tmux.conf }
-
-    - name: download latest Myrica M
-      unarchive:
-        src: https://github.com/tomokuni/Myrica/raw/master/product/MyricaM.zip
-        dest: /tmp/MyricaM/
-        remote_src: yes
-      failed_when: False # ファイル名のせい？で一部ファイル展開時にエラーになるので無視する
-
-    - name: copy to /usr/local/share/fonts/MyricaM.TTC
-      become: yes
-      copy:
-        src: /tmp/MyricaM/MyricaM.TTC
-        dest: /usr/local/share/fonts/
-
-    - name: gsettings
-      command: gsettings set {{ item }}
-      register: gsettings_result
-      changed_when: False
-      failed_when: gsettings_result.rc not in [0]
-      with_items:
-        - org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'skk')]"
-        - org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
-        - org.gnome.desktop.interface clock-show-date true
-        - org.gnome.desktop.interface document-font-name "Roboto 11"
-        - org.gnome.desktop.interface font-name "Roboto 12"
-        - org.gnome.desktop.interface gtk-enable-primary-paste false
-        - org.gnome.desktop.interface gtk-theme "Materia-dark-compact"
-        - org.gnome.desktop.interface icon-theme "Papirus-Dark"
-        - org.gnome.desktop.interface monospace-font-name "M+ 1m 12"
-        - org.gnome.desktop.interface show-battery-percentage true
-        - org.gnome.desktop.screensaver lock-enabled false
-        - org.gnome.desktop.session idle-delay 900
-        - org.gnome.desktop.wm.preferences button-layout ":appmenu,minimize,maximize,close"
-        - org.gnome.desktop.wm.preferences mouse-button-modifier "<Alt>"
-        - org.gnome.desktop.wm.preferences resize-with-right-button true
-        - org.gnome.desktop.wm.preferences titlebar-font "Roboto 12"
-        - org.gnome.settings-daemon.plugins.power power-button-action suspend
-        - org.gnome.shell.extensions.dash-to-dock dock-fixed false
+    - { role: sources.list, when: "mode == 'all'" }
+    - common_app
+    - fish
+    - skk
+    - { role: python, when: "mode == 'all'" }
+    - { role: golang, when: "mode == 'all'" }
+    - { role: dotfiles, when: "mode == 'all'" }
+    - { role: Myrica, when: "mode == 'all'" }
+    - { role: gnome, when: "mode == 'all'" }

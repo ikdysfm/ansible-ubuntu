@@ -1,0 +1,22 @@
+- name: apt install fish
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}"
+  with_items:
+    - { name: fish, state: latest }
+
+- name: set shell
+  become: yes
+  user:
+    name: yoshifumi
+    shell: /usr/bin/fish
+
+- name: install fish plugins
+  shell: fisher
+  register: install_fish_plugins_result
+  changed_when: False
+  failed_when: install_fish_plugins_result.rc not in [0]
+  args:
+    executable: /usr/bin/fish

@@ -1,0 +1,3 @@
+cache_valid_time: 3600
+dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
+gopath: /home/yoshifumi/.go # .bashrcなどの記述と合わせること

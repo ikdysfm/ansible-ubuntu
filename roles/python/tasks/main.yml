@@ -1,0 +1,17 @@
+- name: apt install
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}"
+  with_items:
+    - { name: python3-pip, state: present }
+    - { name: python3-dev, state: present }
+
+- name: pip install # handlersに定義してapt installからnotifyしようかと思ったが、changeが走らないとnotifyされないので保留
+  pip:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    executable: pip3
+  with_items:
+    - { name: pipenv, state: present }

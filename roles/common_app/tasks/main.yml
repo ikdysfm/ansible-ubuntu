@@ -1,0 +1,42 @@
+- name: add apt-key
+  become: yes
+  apt_key:
+    url: "{{ item.url }}"
+  with_items:
+    - { url: 'https://dl-ssl.google.com/linux/linux_signing_key.pub' }
+    - { url: 'https://packages.microsoft.com/keys/microsoft.asc' }
+
+- name: add apt-repository
+  become: yes
+  apt_repository:
+    repo: "{{ item }}"
+  with_items:
+    - deb http://dl.google.com/linux/chrome/deb/ stable main
+    - deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+    - 'ppa:fish-shell/release-2'
+
+- name: apt install
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}" # 2.4以降の場合cache_valid_timeを指定すると自動でupdate_cache=yes
+  with_items:
+    - { name: cifs-utils, state: latest }
+    - { name: direnv, state: latest }
+    - { name: curl, state: latest }
+    - { name: git, state: latest }
+    - { name: vim, state: latest }
+    - { name: tmux, state: latest }
+    - { name: google-chrome-stable, state: latest }
+    - { name: code, state: latest }
+    - { name: ubuntu-restricted-extras, state: latest }
+    - { name: vlc, state: latest }
+
+- name: download latest nvm
+  shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+  register: download_nvm_result
+  changed_when: False
+  failed_when: download_nvm_result.rc not in [0]
+  args:
+    warn: false

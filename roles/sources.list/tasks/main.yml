@@ -1,0 +1,7 @@
+- name: replace sources.list
+  become: yes
+  replace:
+    path: /etc/apt/sources.list
+    regexp: 'http://archive.ubuntu.com/ubuntu'
+    replace: 'http://ftp.jaist.ac.jp/pub/Linux/ubuntu/'
+    backup: yes

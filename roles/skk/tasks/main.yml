@@ -1,0 +1,17 @@
+- name: apt install skk
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}"
+  with_items:
+    - { name: ibus-skk, state: latest }
+    - { name: skkdic, state: latest }
+
+- name: replace skk.xml # ibus-skkは独自のキーボード配列設定を持っていて、デフォルトが日本語
+  become: yes
+  replace:
+    path: /usr/share/ibus/component/skk.xml
+    regexp: '<layout>jp</layout>'
+    replace: '<layout>us</layout>'
+    backup: yes

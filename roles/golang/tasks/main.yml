@@ -1,0 +1,48 @@
+- name: apt install
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}"
+  with_items:
+    - { name: golang, state: present }
+
+- name: check golang module
+  # shell: /bin/bash -lc "go list {{ item }}" # .bashrcから読みたかったが動かない
+  command: go list {{ item }}
+  register: go_module_check
+  failed_when: go_module_check.rc not in [0, 1]
+  changed_when: go_module_check.rc not in [0, 1]
+  with_items:
+    - github.com/motemen/ghq
+  environment:
+    GOPATH: "{{ gopath }}"
+
+- name: install golang modules
+  # shell: /bin/bash -lc "go get {{ item.item }}"
+  command: go get {{ item.item }}
+  when: item.rc == 1 # チェック結果で存在していなかった場合のみ
+  with_items: "{{ go_module_check.results }}" # 配列で格納される
+  environment:
+    GOPATH: "{{ gopath }}"
+
+- name: get latest peco version
+  shell: curl -sI https://github.com/peco/peco/releases/latest | awk -F'/' '/^Location:/{print $NF}'
+  register: peco_latest_version
+  changed_when: False
+  failed_when: peco_latest_version.rc not in [0]
+  args:
+    warn: false
+
+- name: download latest peco
+  unarchive:
+    src: https://github.com/peco/peco/releases/download/{{ peco_latest_version.stdout }}/peco_linux_amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: copy to /usr/local/bin/peco
+  become: yes
+  copy:
+    src: /tmp/peco_linux_amd64/peco
+    dest: /usr/local/bin/
+    mode: 0755
