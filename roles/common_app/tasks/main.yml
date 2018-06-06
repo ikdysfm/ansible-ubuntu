@@ -22,15 +22,14 @@
     state: "{{ item.state }}" 
     cache_valid_time: "{{ cache_valid_time }}" # 2.4以降の場合cache_valid_timeを指定すると自動でupdate_cache=yes
   with_items:
-    - { name: cifs-utils, state: latest }
-    - { name: direnv, state: latest }
-    - { name: curl, state: latest }
+    - { name: ubuntu-restricted-extras, state: latest }
     - { name: git, state: latest }
     - { name: vim, state: latest }
     - { name: tmux, state: latest }
+    - { name: direnv, state: latest }
+    - { name: curl, state: latest }
     - { name: google-chrome-stable, state: latest }
     - { name: code, state: latest }
-    - { name: ubuntu-restricted-extras, state: latest }
     - { name: vlc, state: latest }
 
 - name: download latest nvm

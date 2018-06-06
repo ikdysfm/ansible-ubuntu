@@ -1,0 +1,8 @@
+- name: apt install
+  become: yes
+  apt:
+    name: "{{ item.name }}" 
+    state: "{{ item.state }}" 
+    cache_valid_time: "{{ cache_valid_time }}"
+  with_items:
+    - { name: cifs-utils, state: latest }
