@@ -1,3 +1,6 @@
 cache_valid_time: 3600
+cifs_server_ip: '192.168.10.32'
 dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
 gopath: /home/yoshifumi/.go # .bashrcなどの記述と合わせること
+my_uid: 1000
+my_gid: 1000

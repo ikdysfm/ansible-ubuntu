@@ -6,3 +6,19 @@
     cache_valid_time: "{{ cache_valid_time }}"
   with_items:
     - { name: cifs-utils, state: latest }
+
+- name: input mount pass
+  pause:
+    prompt: "Enter mount pass. (To skip, enter a blank.)"
+    echo: no
+  register: input_mount_pass_result
+
+- name: mount shared folder
+  become: yes
+  when: input_mount_pass_result.user_input | length > 0
+  mount:
+    path: /home/yoshifumi/Delta
+    src: "//{{ cifs_server_ip }}/Delta"
+    fstype: cifs
+    opts: "username=Yoshifumi,password={{ input_mount_pass_result.user_input }},uid={{ my_uid }},gid={{ my_gid }},dir_mode=0755,file_mode=0644"
+    state: mounted
