@@ -26,6 +26,7 @@
     - { name: git, state: latest }
     - { name: vim, state: latest }
     - { name: tmux, state: latest }
+    - { name: xsel, state: latest }
     - { name: direnv, state: latest }
     - { name: curl, state: latest }
     - { name: google-chrome-stable, state: latest }
