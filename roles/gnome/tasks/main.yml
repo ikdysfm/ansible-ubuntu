@@ -31,11 +31,12 @@
     - org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('ibus', 'skk')]"
     - org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
     - org.gnome.desktop.interface clock-show-date true
+    - org.gnome.desktop.interface cursor-theme "Paper"
     - org.gnome.desktop.interface document-font-name "Roboto 11"
     - org.gnome.desktop.interface font-name "Roboto 12"
     - org.gnome.desktop.interface gtk-enable-primary-paste false
     - org.gnome.desktop.interface gtk-theme "Materia-dark-compact"
-    - org.gnome.desktop.interface icon-theme "Papirus-Dark"
+    - org.gnome.desktop.interface icon-theme "Paper-Mono-Dark"
     - org.gnome.desktop.interface monospace-font-name "M+ 1m 12"
     - org.gnome.desktop.interface show-battery-percentage true
     - org.gnome.desktop.screensaver lock-enabled false
