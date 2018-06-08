@@ -1,3 +1,10 @@
+- name: add theme-repository
+  become: yes
+  apt_repository:
+    repo: "{{ item }}"
+  with_items:
+    - 'ppa:snwh/pulp'
+
 - name: apt install gnome
   become: yes
   apt:
@@ -8,6 +15,9 @@
     - { name: gnome-tweaks, state: latest }
     - { name: materia-gtk-theme, state: latest }
     - { name: papirus-icon-theme, state: latest }
+    - { name: paper-icon-theme, state: latest }
+    - { name: paper-cursor-theme, state: latest }
+    # - { name: paper-gtk-theme, state: latest } 見つからない
     - { name: fonts-ricty-diminished, state: latest }
     - { name: fonts-roboto, state: latest }
     - { name: fonts-mplus, state: latest }
