@@ -1,28 +1,28 @@
 - name: clone dotfiles
   git:
     repo: git@github.com:ikdysfm/dotfiles.git # pushには鍵を作るかssh-agentを使う
-    dest: ~{{ dotfiles_path }}
+    dest: "{{ dotfiles_path }}"
 
 - name: create dotfiles directories
   file:
     path: "{{ item }}"
     state: directory
   with_items:
-    - '~/.config/fish/functions'
+    - '{{user_home}}/.config/fish/functions'
 
 - name: create dotfiles symlinks
   file:
-    src: ~{{ dotfiles_path }}/{{ item.src }}
+    src: "{{ dotfiles_path }}/{{ item.src }}"
     dest: "{{ item.dest }}"
     state: link
     force: yes
   with_items:
-    - { src: git/.gitconfig, dest: ~/.gitconfig }
-    - { src: git/.gitignore_global, dest: ~/.gitignore_global }
-    - { src: fish/config.fish, dest: ~/.config/fish/config.fish }
-    - { src: fish/fishfile, dest: ~/.config/fish/fishfile }
-    - { src: fish/functions/fisher.fish, dest: ~/.config/fish/functions/fisher.fish }
-    - { src: fish/functions/provision.fish, dest: ~/.config/fish/functions/provision.fish }
-    - { src: fish/functions/nvm.fish, dest: ~/.config/fish/functions/nvm.fish }
-    - { src: fish/functions/tmux_smart_attach.fish, dest: ~/.config/fish/functions/tmux_smart_attach.fish }
-    - { src: tmux/.tmux.conf, dest: ~/.tmux.conf }
+    - { src: git/.gitconfig, dest: "{{ user_home }}/.gitconfig" }
+    - { src: git/.gitignore_global, dest: "{{ user_home }}/.gitignore_global" }
+    - { src: fish/config.fish, dest: "{{ user_home }}/.config/fish/config.fish" }
+    - { src: fish/fishfile, dest: "{{ user_home }}/.config/fish/fishfile" }
+    - { src: fish/functions/fisher.fish, dest: "{{ user_home }}/.config/fish/functions/fisher.fish" }
+    - { src: fish/functions/provision.fish, dest: "{{ user_home }}/.config/fish/functions/provision.fish" }
+    - { src: fish/functions/nvm.fish, dest: "{{ user_home }}/.config/fish/functions/nvm.fish" }
+    - { src: fish/functions/tmux_smart_attach.fish, dest: "{{ user_home }}/.config/fish/functions/tmux_smart_attach.fish" }
+    - { src: tmux/.tmux.conf, dest: "{{ user_home }}/.tmux.conf" }

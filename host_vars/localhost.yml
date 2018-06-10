@@ -1,6 +1,8 @@
+user_name: yoshifumi
+user_home: /home/{{ user_name }} # become:yesだと~が使えなかったので明示的に定義
 cache_valid_time: 3600
-cifs_server_ip: '192.168.10.32'
-dotfiles_path: /src/github.com/ikdysfm/dotfiles # .gitconfigに書いてあるghqの設定と合わせること
-gopath: /home/yoshifumi/.go # .bashrcなどの記述と合わせること
+cifs_server_ip: "192.168.10.32"
+dotfiles_path: "{{ user_home }}/src/github.com/ikdysfm/dotfiles" # .gitconfigに書いてあるghqの設定と合わせること
+gopath: "{{ user_home }}/.go" # .bashrcなどの記述と合わせること
 my_uid: 1000
 my_gid: 1000

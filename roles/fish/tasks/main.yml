@@ -10,7 +10,7 @@
 - name: set shell
   become: yes
   user:
-    name: yoshifumi
+    name: "{{ user_name }}"
     shell: /usr/bin/fish
 
 - name: install fish plugins
