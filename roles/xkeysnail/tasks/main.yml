@@ -1,0 +1,48 @@
+# https://qiita.com/samurai20000@github/items/2e1d779e806a7e8543d6
+# role的にはpipのインストールを含めるべきだがバージョンはpythonロールで一元管理したいため省略
+# またconfig.pyのcloneとlink生成もここでやるべきだがdotfilesで一元管理したいため省略。順序に注意
+
+# - name: xkeysnail install
+#   sudo pip installは一般的に控えるべきだが公式マニュアルにも書いてあるため敢えてやっている
+#   become: yes yesだと何故かエラーになるので一旦コメントアウト。手動でインストール
+#   pip:
+#     name: "{{ item.name }}"
+#     state: "{{ item.state }}"
+#     executable: pip3
+#   with_items:
+#     - { name: xkeysnail, state: latest }
+
+- name: add uinput group
+  become: yes
+  group:
+    name: uinput
+
+- name: add current user in uinput and input group
+  become: yes
+  user:
+    name: "{{ user_name }}"
+    groups: uinput,input
+    append: yes
+
+- name: add uinput rule in udev
+  become: yes
+  template:
+    src: uinput.rules
+    dest: /etc/udev/rules.d/
+
+- name: add input rule in udev
+  become: yes
+  template:
+    src: input.rules 
+    dest: /etc/udev/rules.d/
+
+# - name: reload udev rules
+#   become: yes
+#   command: udevadm control --reload-rules && udevadm trigger
+
+- name: enable xkeysnail service
+  systemd:
+    name: xkeysnail
+    enabled: yes
+    state: started
+    user: yes

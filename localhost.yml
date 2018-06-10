@@ -16,6 +16,7 @@
     - { role: python, when: "mode == 'all'" }
     - { role: golang, when: "mode == 'all'" }
     - { role: dotfiles, when: "mode == 'all'" }
+    - { role: xkeysnail, when: "mode == 'all'" } # config.pyのコピーを確実にするため、dotfilesの後である必要がある
     - { role: Myrica, when: "mode == 'all'" }
     - { role: gnome, when: "mode == 'all'" }
     - { role: mount, when: "mode == 'all'" }

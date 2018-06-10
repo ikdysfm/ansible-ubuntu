@@ -9,6 +9,8 @@
     state: directory
   with_items:
     - '{{user_home}}/.config/fish/functions'
+    - '{{user_home}}/.xkeysnail'
+    - '{{user_home}}/.config/systemd/user'
 
 - name: create dotfiles symlinks
   file:
@@ -26,3 +28,13 @@
     - { src: fish/functions/nvm.fish, dest: "{{ user_home }}/.config/fish/functions/nvm.fish" }
     - { src: fish/functions/tmux_smart_attach.fish, dest: "{{ user_home }}/.config/fish/functions/tmux_smart_attach.fish" }
     - { src: tmux/.tmux.conf, dest: "{{ user_home }}/.tmux.conf" }
+    - { src: xkeysnail/config.py, dest: "{{ user_home }}/.xkeysnail/config.py" }
+
+- name: create dotfiles hardlinks
+  file:
+    src: "{{ dotfiles_path }}/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: hard
+    force: yes
+  with_items:
+    - { src: xkeysnail/xkeysnail.service.j2, dest: "{{ user_home }}/.config/systemd/user/xkeysnail.service" }
