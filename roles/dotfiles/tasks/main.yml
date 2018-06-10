@@ -28,6 +28,7 @@
     - { src: fish/functions/nvm.fish, dest: "{{ user_home }}/.config/fish/functions/nvm.fish" }
     - { src: fish/functions/tmux_smart_attach.fish, dest: "{{ user_home }}/.config/fish/functions/tmux_smart_attach.fish" }
     - { src: tmux/.tmux.conf, dest: "{{ user_home }}/.tmux.conf" }
+    - { src: xsettings/.xsessionrc, dest: "{{ user_home }}/.xsessionrc" }
     - { src: xkeysnail/config.py, dest: "{{ user_home }}/.xkeysnail/config.py" }
 
 - name: create dotfiles hardlinks
