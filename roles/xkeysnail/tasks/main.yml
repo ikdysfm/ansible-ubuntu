@@ -4,7 +4,7 @@
 
 # - name: xkeysnail install
 #   sudo pip installは一般的に控えるべきだが公式マニュアルにも書いてあるため敢えてやっている
-#   become: yes yesだと何故かエラーになるので一旦コメントアウト。手動でインストール
+#   become: yes TODO: yesだと何故かエラーになるので一旦コメントアウト。手動でインストール
 #   pip:
 #     name: "{{ item.name }}"
 #     state: "{{ item.state }}"
@@ -36,6 +36,7 @@
     src: input.rules 
     dest: /etc/udev/rules.d/
 
+# TODO: 下記リロードが思うように動かないため、再起動が必要
 # - name: reload udev rules
 #   become: yes
 #   command: udevadm control --reload-rules && udevadm trigger

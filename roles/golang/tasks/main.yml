@@ -8,7 +8,7 @@
     - { name: golang, state: present }
 
 - name: check golang module
-  # shell: /bin/bash -lc "go list {{ item }}" # .bashrcから読みたかったが動かない
+  # shell: /bin/bash -lc "go list {{ item }}" TODO: .bashrcから読みたかったが動かない
   command: go list {{ item }}
   register: go_module_check
   failed_when: go_module_check.rc not in [0, 1]
