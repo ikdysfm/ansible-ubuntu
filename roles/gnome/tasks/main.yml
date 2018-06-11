@@ -48,5 +48,12 @@
     - org.gnome.mutter overlay-key 'Super_R'
     - org.gnome.nautilus.desktop trash-icon-visible false
     - org.gnome.nautilus.desktop volumes-visible false
+    - org.gnome.nautilus.list-view use-tree-view true
+    - org.gnome.nautilus.preferences confirm-trash false
+    - org.gnome.nautilus.preferences executable-text-activation 'ask'
+    - org.gnome.nautilus.preferences recursive-search 'always'
+    - org.gnome.nautilus.preferences show-directory-item-counts 'always'
+    - org.gnome.nautilus.preferences show-create-link true
+    - org.gnome.nautilus.preferences show-image-thumbnails 'always'
     - org.gnome.settings-daemon.plugins.power power-button-action suspend
     - org.gnome.shell.extensions.dash-to-dock dock-fixed false
