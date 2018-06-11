@@ -17,7 +17,7 @@
     - { name: papirus-icon-theme, state: latest }
     - { name: paper-icon-theme, state: latest }
     - { name: paper-cursor-theme, state: latest }
-    # - { name: paper-gtk-theme, state: latest } 見つからない
+    # - { name: paper-gtk-theme, state: latest } TODO: 見つからない
     - { name: fonts-ricty-diminished, state: latest }
     - { name: fonts-roboto, state: latest }
     - { name: fonts-mplus, state: latest }
@@ -45,6 +45,10 @@
     - org.gnome.desktop.wm.preferences mouse-button-modifier "<Alt>"
     - org.gnome.desktop.wm.preferences resize-with-right-button true
     - org.gnome.desktop.wm.preferences titlebar-font "Roboto 12"
+    - org.gnome.desktop.privacy remove-old-temp-files true
+    - org.gnome.desktop.privacy old-files-age 7
+    - org.gnome.desktop.privacy remember-recent-files false
+    - org.gnome.desktop.privacy recent-files-max-age 1
     - org.gnome.mutter overlay-key 'Super_R'
     - org.gnome.nautilus.desktop trash-icon-visible false
     - org.gnome.nautilus.desktop volumes-visible false
@@ -57,3 +61,20 @@
     - org.gnome.nautilus.preferences show-image-thumbnails 'always'
     - org.gnome.settings-daemon.plugins.power power-button-action suspend
     - org.gnome.shell.extensions.dash-to-dock dock-fixed false
+
+- name: replace user-dirs.dirs
+  replace:
+    path: "{{ user_home }}/.config/user-dirs.dirs"
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+    backup: yes
+  with_items:
+    # nautilusのサイドバーで非表示にしたい場合、コメントアウトだとリブート時に復元されてしまうようになった
+    # 回避策としてHOMEを指定する
+    - { regexp: ^XDG_DOWNLOAD.*, replace: 'XDG_DOWNLOAD_DIR="$HOME"' }
+    - { regexp: ^XDG_TEMPLATES.*, replace: 'XDG_TEMPLATES_DIR="$HOME"' }
+    - { regexp: ^XDG_PUBLICSHARE.*, replace: 'XDG_PUBLICSHARE_DIR="$HOME"' }
+    - { regexp: ^XDG_DOCUMENTS.*, replace: 'XDG_DOCUMENTS_DIR="$HOME"' }
+    - { regexp: ^XDG_MUSIC.*, replace: 'XDG_MUSIC_DIR="$HOME"' }
+    - { regexp: ^XDG_PICTURES.*, replace: 'XDG_PICTURES_DIR="$HOME"' }
+    - { regexp: ^XDG_VIDEOS.*, replace: 'XDG_VIDEOS_DIR="$HOME"' }
