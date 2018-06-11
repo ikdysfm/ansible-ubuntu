@@ -21,7 +21,7 @@
   with_items:
     - deb http://dl.google.com/linux/chrome/deb/ stable main
     - deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
-    - deb http://linux.dropbox.com/ubuntu stable main
+    # - deb http://linux.dropbox.com/ubuntu stable main # 何故かエラーになる？
     - 'ppa:fish-shell/release-2'
 
 - name: apt install
