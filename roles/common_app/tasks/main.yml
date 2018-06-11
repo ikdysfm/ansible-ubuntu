@@ -1,10 +1,18 @@
-- name: add apt-key
+- name: add apt-key url
   become: yes
   apt_key:
     url: "{{ item.url }}"
   with_items:
     - { url: 'https://dl-ssl.google.com/linux/linux_signing_key.pub' }
     - { url: 'https://packages.microsoft.com/keys/microsoft.asc' }
+
+- name: add apt-key keyserver
+  become: yes
+  apt_key:
+    keyserver: "{{ item.keyserver }}"
+    id : "{{ item.id }}"
+  with_items:
+    - { keyserver: 'pgp.mit.edu', id: '1C61A2656FB57B7E4DE0F4C1FC918B335044912E' } # dropbox
 
 - name: add apt-repository
   become: yes
@@ -13,6 +21,7 @@
   with_items:
     - deb http://dl.google.com/linux/chrome/deb/ stable main
     - deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+    - deb http://linux.dropbox.com/ubuntu stable main
     - 'ppa:fish-shell/release-2'
 
 - name: apt install
@@ -29,6 +38,7 @@
     - { name: xsel, state: latest }
     - { name: direnv, state: latest }
     - { name: curl, state: latest }
+    - { name: nautilus-dropbox, state: latest }
     - { name: lastpass-cli, state: latest }
     - { name: google-chrome-stable, state: latest }
     - { name: code, state: latest }
