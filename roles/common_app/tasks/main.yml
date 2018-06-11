@@ -29,6 +29,7 @@
     - { name: xsel, state: latest }
     - { name: direnv, state: latest }
     - { name: curl, state: latest }
+    - { name: lastpass-cli, state: latest }
     - { name: google-chrome-stable, state: latest }
     - { name: code, state: latest }
     - { name: vlc, state: latest }
