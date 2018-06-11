@@ -11,11 +11,11 @@
   roles:
     - { role: sources.list, when: "mode == 'all'" }
     - common_app
-    - fish
     - skk
     - { role: python, when: "mode == 'all'" }
     - { role: golang, when: "mode == 'all'" }
     - { role: dotfiles, when: "mode == 'all'" }
+    - fish # dotfilesの後じゃないとfisherが使えない
     - { role: xkeysnail, when: "mode == 'all'" } # config.pyのコピーを確実にするため、dotfilesの後である必要がある
     - { role: Myrica, when: "mode == 'all'" }
     - { role: gnome, when: "mode == 'all'" }
