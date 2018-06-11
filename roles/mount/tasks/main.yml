@@ -17,8 +17,8 @@
   become: yes
   when: input_mount_pass_result.user_input | length > 0
   mount:
-    path: /home/yoshifumi/Delta
+    path: "{{ user_home }}/Delta"
     src: "//{{ cifs_server_ip }}/Delta"
     fstype: cifs
-    opts: "username=Yoshifumi,password={{ input_mount_pass_result.user_input }},uid={{ my_uid }},gid={{ my_gid }},dir_mode=0755,file_mode=0644"
+    opts: "username={{ user_name }},password={{ input_mount_pass_result.user_input }},uid={{ my_uid }},gid={{ my_gid }},dir_mode=0755,file_mode=0644"
     state: mounted
