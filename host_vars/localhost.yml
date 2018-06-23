@@ -6,3 +6,4 @@ dotfiles_path: "{{ user_home }}/src/github.com/ikdysfm/dotfiles" # .gitconfigに
 gopath: "{{ user_home }}/.go" # .bashrcなどの記述と合わせること
 my_uid: 1000
 my_gid: 1000
+xkeysnail_config: x1carbon # 起動時に適用したいconfigファイルの名前
