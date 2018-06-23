@@ -27,6 +27,7 @@
     - { src: fish/functions/provision.fish, dest: "{{ user_home }}/.config/fish/functions/provision.fish" }
     - { src: fish/functions/nvm.fish, dest: "{{ user_home }}/.config/fish/functions/nvm.fish" }
     - { src: fish/functions/tmux_smart_attach.fish, dest: "{{ user_home }}/.config/fish/functions/tmux_smart_attach.fish" }
+    - { src: fish/functions/cramshell.fish, dest: "{{ user_home }}/.config/fish/functions/cramshell.fish" }
     - { src: tmux/.tmux.conf, dest: "{{ user_home }}/.tmux.conf" }
     - { src: xsettings/.xsessionrc, dest: "{{ user_home }}/.xsessionrc" }
     - { src: "xkeysnail/{{ xkeysnail_config }}.py", dest: "{{ user_home }}/.xkeysnail/config.py" }
