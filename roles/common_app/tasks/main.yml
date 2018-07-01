@@ -41,8 +41,10 @@
     - { name: nautilus-dropbox, state: latest }
     - { name: lastpass-cli, state: latest }
     - { name: google-chrome-stable, state: latest }
+    - { name: google-cloud-sdk, state: latest }
     - { name: code, state: latest }
-    - { name: vlc, state: latest }
+    - { name: vlc, state: latest 
+    }
 
 - name: download latest nvm
   shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
