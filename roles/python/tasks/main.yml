@@ -6,7 +6,8 @@
     cache_valid_time: "{{ cache_valid_time }}"
   with_items:
     - { name: python3-pip, state: present }
-    - { name: python3-dev, state: present }
+    - { name: python3.6-dev, state: present }
+    - { name: python3.7-dev, state: present }
 
 - name: pip install # handlersに定義してapt installからnotifyしようかと思ったが、changeが走らないとnotifyされないので保留
   pip:
