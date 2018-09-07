@@ -19,7 +19,7 @@
   apt_repository:
     repo: "{{ item }}"
   with_items:
-    - deb http://dl.google.com/linux/chrome/deb/ stable main
+    # - deb http://dl.google.com/linux/chrome/deb/ stable main # TODO: 複数回指定エラーになる？
     - deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
     # - deb http://linux.dropbox.com/ubuntu stable main # TODO: 何故かエラーになる？
     - 'ppa:fish-shell/release-2'
