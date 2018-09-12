@@ -45,6 +45,13 @@
     - { name: code, state: latest }
     - { name: vlc, state: latest }
 
+- name: increase max_user_watches (for vscode)
+  become: yes
+  sysctl:
+    name: fs.inotify.max_user_watches
+    value: 524288
+    state: present
+
 - name: download latest nvm
   shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
   register: download_nvm_result
