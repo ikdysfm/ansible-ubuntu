@@ -20,5 +20,5 @@
     path: "{{ user_home }}/Delta"
     src: "//{{ cifs_server_ip }}/Delta"
     fstype: cifs
-    opts: "username={{ user_name }},password={{ input_mount_pass_result.user_input }},uid={{ my_uid }},gid={{ my_gid }},dir_mode=0755,file_mode=0644"
+    opts: "username={{ user_name }},password={{ input_mount_pass_result.user_input }},uid={{ my_uid }},gid={{ my_gid }},dir_mode=0755,file_mode=0644,vers=2.1"
     state: mounted
