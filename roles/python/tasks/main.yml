@@ -6,6 +6,8 @@
     cache_valid_time: "{{ cache_valid_time }}"
   with_items:
     - { name: python3-pip, state: present }
+    - { name: python-dev, state: present }
+    - { name: default-libmysqlclient-dev, state: present }
     - { name: python3.6-dev, state: present }
     - { name: python3.7-dev, state: present }
 
