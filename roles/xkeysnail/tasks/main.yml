@@ -46,4 +46,4 @@
     name: xkeysnail
     enabled: yes
     state: started
-    user: yes
+    scope: user
