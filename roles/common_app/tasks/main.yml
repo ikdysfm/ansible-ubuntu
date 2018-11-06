@@ -55,12 +55,10 @@
     value: 524288
     state: present
 
-- name: install ndenv
-  git:
-    repo: https://github.com/riywo/ndenv
-    dest: "{{ user_home }}/.ndenv"
-
-- name: install node-build
-  git:
-    repo: https://github.com/riywo/node-build
-    dest: "{{ user_home }}/.ndenv/plugins/node-build"
+- name: download latest nvm
+  shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+  register: download_nvm_result
+  changed_when: False
+  failed_when: download_nvm_result.rc not in [0]
+  args:
+    warn: false
