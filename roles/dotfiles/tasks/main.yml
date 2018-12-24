@@ -32,6 +32,16 @@
     - { src: xsettings/.xsessionrc, dest: "{{ user_home }}/.xsessionrc" }
     - { src: "xkeysnail/{{ xkeysnail_config }}.py", dest: "{{ user_home }}/.xkeysnail/config.py" }
 
+- name: create dotfiles hardlinks (sudo)
+  become: yes
+  file:
+    src: "{{ dotfiles_path }}/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: hard
+    force: yes
+  with_items:
+    - { src: xsettings/10-slimblade.conf, dest: "/usr/share/X11/xorg.conf.d/10-slimblade.conf" }
+
 - name: create dotfiles hardlinks
   file:
     src: "{{ dotfiles_path }}/{{ item.src }}"
